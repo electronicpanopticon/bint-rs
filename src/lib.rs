@@ -6,6 +6,10 @@ pub struct Bint {
 
 #[allow(dead_code)]
 impl Bint {
+    pub fn new(boundary: u8) -> Bint {
+        Bint {value: 0, boundary: boundary}
+    }
+
     pub fn up(&self) -> Bint {
         let v = (self.value + 1) % self.boundary;
         Bint {value: v, boundary: self.boundary}
@@ -24,6 +28,13 @@ impl Bint {
 mod tests {
 
     use super::*;
+
+    #[test]
+    fn new() {
+        let b = Bint::new(6);
+        assert_eq!(0, b.value);
+        assert_eq!(6, b.boundary);
+    }
 
     #[test]
     fn init() {
