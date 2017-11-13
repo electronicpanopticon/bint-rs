@@ -10,6 +10,14 @@ impl Bint {
         let v = (self.value + 1) % self.boundary;
         Bint {value: v, boundary: self.boundary}
     }
+
+    fn down(&self) -> Bint {
+        if self.value == 0 {
+            return Bint {value: self.boundary - 1, boundary: self.boundary};
+        }
+        let v = (self.value - 1) % self.boundary;
+        Bint {value: v, boundary: self.boundary}
+    }
 }
 
 #[cfg(test)]
@@ -26,8 +34,21 @@ mod tests {
 
     #[test]
     fn up() {
-        let b: Bint = Bint {value: 0, boundary: 6 };
+        let b: Bint = Bint {value: 4, boundary: 6 };
         let b: Bint = b.up();
-        assert_eq!(1, b.value);
+        assert_eq!(5, b.value);
+
+        let b: Bint = b.up();
+        assert_eq!(0, b.value);
+    }
+
+    #[test]
+    fn down() {
+        let b: Bint = Bint {value: 1, boundary: 6 };
+        let b: Bint = b.down();
+        assert_eq!(0, b.value);
+
+        let b: Bint = b.down();
+        assert_eq!(5, b.value);
     }
 }
