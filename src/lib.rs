@@ -6,12 +6,12 @@ pub struct Bint {
 
 #[allow(dead_code)]
 impl Bint {
-    fn up(&self) -> Bint {
+    pub fn up(&self) -> Bint {
         let v = (self.value + 1) % self.boundary;
         Bint {value: v, boundary: self.boundary}
     }
 
-    fn down(&self) -> Bint {
+    pub fn down(&self) -> Bint {
         if self.value == 0 {
             return Bint {value: self.boundary - 1, boundary: self.boundary};
         }
@@ -50,5 +50,16 @@ mod tests {
 
         let b: Bint = b.down();
         assert_eq!(5, b.value);
+    }
+
+    #[test]
+    fn up_bint_outside() {
+        let b: Bint = Bint {value: 50, boundary: 10 };
+        let b: Bint = b.up();
+        assert_eq!(1, b.value);
+
+        let b: Bint = b.down();
+        let b: Bint = b.down();
+        assert_eq!(9, b.value);
     }
 }
