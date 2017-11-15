@@ -1,3 +1,6 @@
+use std::fmt;
+
+/// A bounded integer.
 #[allow(dead_code)]
 pub struct Bint {
     value: u8,
@@ -24,6 +27,12 @@ impl Bint {
     }
 }
 
+impl fmt::Display for Bint {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -34,6 +43,12 @@ mod tests {
         let b = Bint::new(6);
         assert_eq!(0, b.value);
         assert_eq!(6, b.boundary);
+    }
+
+    #[test]
+    fn format() {
+        let b: Bint = Bint {value: 4, boundary: 6 };
+        assert_eq!("4", format!("{}", b));
     }
 
     #[test]
