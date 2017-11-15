@@ -1,6 +1,6 @@
 use std::fmt;
 
-/// A bounded integer.
+/// Bint: A bounded integer.
 #[allow(dead_code)]
 pub struct Bint {
     value: u8,
