@@ -10,7 +10,7 @@ readme = "README.md"
 description = "Bounded Integer in Rust."
 
 [dependencies]
-clippy = {version = "*", optional = true}
+clippy = {version = "0.0.302", optional = true}
 
 [features]
 default = []

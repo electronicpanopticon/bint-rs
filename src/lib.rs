@@ -4,28 +4,15 @@
 use std::fmt;
 
 /// Bint: A bounded integer.
-#[allow(dead_code)]
+///
+/// Returns a struct that represents an unsigned integer and a boundary that represents when
+//  the value will be reset to 0.
 pub struct Bint {
     pub value: u8,
     pub boundary: u8,
 }
 
-#[allow(dead_code)]
 impl Bint {
-    /// Returns a struct that represents an unsigned integer and a boundary that represents when
-    /// the value will be reset to 0.
-    ///
-    /// # Usage:
-    /// ```
-    /// extern crate bint;
-    ///
-    /// let b: bint::Bint = bint::Bint {value: 5, boundary: 6 };
-    /// let c: Bint = b.up();
-    /// let d: Bint = c.up();
-    ///
-    /// println!("{} {} {}", b, c, d); // Prints 5 0 1
-    /// ```
-
     pub fn new(boundary: u8) -> Bint {
         Bint {
             value: 0,
@@ -61,6 +48,17 @@ impl fmt::Display for Bint {
         write!(f, "{}", self.value)
     }
 }
+
+///
+/// # Usage:
+/// ```
+/// let b: Bint = Bint {value: 5, boundary: 6 };
+/// let c: Bint = b.up();
+/// let d: Bint = c.up();
+/// println!("{} {} {}", b, c, d); // Prints 5 0 1
+///
+/// assert_eq!(1, d.value);
+/// ```
 
 #[cfg(test)]
 mod tests {
