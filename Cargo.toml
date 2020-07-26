@@ -1,6 +1,6 @@
 [package]
 name = "bint"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Christoph <gaoler@electronicpanopticon.com"]
 repository = "https://github.com/folkengine/bint-rs.git"
 homepage = "https://github.com/folkengine/bint-rs"

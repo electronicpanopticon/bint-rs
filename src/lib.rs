@@ -16,7 +16,7 @@ impl Bint {
     pub fn new(boundary: u8) -> Bint {
         Bint {
             value: 0,
-            boundary: boundary,
+            boundary,
         }
     }
 
@@ -52,6 +52,8 @@ impl fmt::Display for Bint {
 ///
 /// # Usage:
 /// ```
+/// use bint::Bint;
+///
 /// let b: Bint = Bint {value: 5, boundary: 6 };
 /// let c: Bint = b.up();
 /// let d: Bint = c.up();
