@@ -1,24 +1,31 @@
-#![deny(clippy::all)]
+#![warn(clippy::pedantic)]
 
 use std::fmt;
 
 /// Bint: A bounded integer.
 ///
 /// Returns a struct that represents an unsigned integer and a boundary that represents when
-//  the value will be reset to 0.
+///  the value will be reset to 0.
+///
+/// ```
+/// use bint::Bint;
+///
+/// let b: Bint = Bint {value: 5, boundary: 6 };
+/// let c: Bint = b.up();
+/// let d: Bint = c.up();
+/// ```
 pub struct Bint {
     pub value: u8,
     pub boundary: u8,
 }
 
 impl Bint {
+    #[must_use]
     pub fn new(boundary: u8) -> Bint {
-        Bint {
-            value: 0,
-            boundary,
-        }
+        Bint { value: 0, boundary }
     }
 
+    #[must_use]
     pub fn up(&self) -> Bint {
         let v = (self.value + 1) % self.boundary;
         Bint {
@@ -27,6 +34,7 @@ impl Bint {
         }
     }
 
+    #[must_use]
     pub fn down(&self) -> Bint {
         if self.value == 0 {
             return Bint {
