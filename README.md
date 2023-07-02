@@ -1,5 +1,5 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-![Build Status](https://github.com/electronicpanopticon/bint/actions/workflows/basic.yaml/badge.svg)
+![Build Status](https://github.com/electronicpanopticon/bint/actions/workflows/CI.yaml/badge.svg)
 [![Crates.io Version](https://img.shields.io/crates/v/bint.svg)](https://crates.io/crates/bint)
 
 # bint-rs
