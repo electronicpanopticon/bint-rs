@@ -4,8 +4,6 @@
 
 # bint-rs
 
-[![Build Status](https://api.travis-ci.org/folkengine/bint-rs.svg?branch=master)](https://travis-ci.org/folkengine/bint-rs)
-
 Bounded Integer in Rust
 
 ## Usage
