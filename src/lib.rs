@@ -13,6 +13,10 @@ use std::fmt;
 /// let b: Bint = Bint {value: 5, boundary: 6 };
 /// let c: Bint = b.up();
 /// let d: Bint = c.up();
+///
+/// assert_eq!(5, b.value);
+/// assert_eq!(0, c.value);
+/// assert_eq!(1, d.value);
 /// ```
 pub struct Bint {
     pub value: u8,

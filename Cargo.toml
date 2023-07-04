@@ -1,7 +1,7 @@
 [package]
 name = "bint"
 description = "Bounded Integer in Rust."
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Christoph <gaoler@electronicpanopticon.com"]
 repository = "https://github.com/electronicpanopticon/bint-rs.git"
 homepage = "https://github.com/electronicpanopticon/bint-rs"
