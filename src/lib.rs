@@ -115,6 +115,10 @@ impl BintCell {
         self.cell.set(bint.value);
     }
 
+    pub fn reset(&self) {
+        self.cell.set(0);
+    }
+
     #[must_use]
     pub fn value(&self) -> u8 {
         self.cell.get()
@@ -240,5 +244,14 @@ mod tests {
     }
 
     #[test]
-    fn cell_reset() {}
+    fn cell_reset() {
+        let b = BintCell::new(8);
+        b.up();
+        b.up();
+        b.up();
+
+        b.reset();
+
+        assert_eq!(0, b.value());
+    }
 }
