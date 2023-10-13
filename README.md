@@ -10,7 +10,7 @@ Bounded Integer in Rust
 
 Original immutable Bint:
 
-```rust
+```
 extern crate bint;
 
 let b: bint::Bint = bint::Bint {value: 5, boundary: 6 };
@@ -22,10 +22,10 @@ println!("{} {} {}", b, c, d); // Prints 5 0 1
 
 New and improved BintCell:
 
-```rust
+```
 use bint::BintCell;
-let b = BintCell::new(6);
 
+let b = BintCell::new(6);
 b.down();
 assert_eq!(5, b.value());
 

@@ -197,7 +197,6 @@ mod tests {
         assert_eq!(9, b.value);
     }
 
-
     #[test]
     fn cell_new() {
         let b = BintCell::new(6);
@@ -241,7 +240,5 @@ mod tests {
     }
 
     #[test]
-    fn cell_reset() {
-        
-    }
+    fn cell_reset() {}
 }
