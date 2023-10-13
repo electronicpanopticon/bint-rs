@@ -8,7 +8,9 @@ Bounded Integer in Rust
 
 ## Usage
 
-```
+Original immutable Bint:
+
+```rust
 extern crate bint;
 
 let b: bint::Bint = bint::Bint {value: 5, boundary: 6 };
@@ -16,6 +18,21 @@ let c: Bint = b.up();
 let d: Bint = c.up();
 
 println!("{} {} {}", b, c, d); // Prints 5 0 1
+```
+
+New and improved BintCell:
+
+```rust
+use bint::BintCell;
+let b = BintCell::new(6);
+
+b.down();
+assert_eq!(5, b.value());
+
+b.up();
+b.up();
+b.up();
+assert_eq!(2, b.value());
 ```
 
 ## Other examples
