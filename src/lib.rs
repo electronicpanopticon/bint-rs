@@ -132,48 +132,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn cell_new() {
-        let b = BintCell::new(6);
-        assert_eq!(0, b.value());
-        assert_eq!(6, b.boundary);
-    }
-
-    #[test]
-    fn cell_format() {
-        let b: BintCell = BintCell {
-            cell: Cell::new(4),
-            boundary: 6,
-        };
-        assert_eq!("4", format!("{}", b));
-    }
-
-    #[test]
-    fn cell_up() {
-        let b: BintCell = BintCell {
-            cell: Cell::new(4),
-            boundary: 6,
-        };
-        b.up();
-        assert_eq!(5, b.value());
-
-        b.up();
-        assert_eq!(0, b.value());
-    }
-
-    #[test]
-    fn cell_down() {
-        let b: BintCell = BintCell {
-            cell: Cell::new(1),
-            boundary: 6,
-        };
-        b.down();
-        assert_eq!(0, b.value());
-
-        b.down();
-        assert_eq!(5, b.value());
-    }
-
-    #[test]
     fn new() {
         let b = Bint::new(6);
         assert_eq!(0, b.value);
@@ -237,5 +195,53 @@ mod tests {
         let b: Bint = b.down();
         let b: Bint = b.down();
         assert_eq!(9, b.value);
+    }
+
+
+    #[test]
+    fn cell_new() {
+        let b = BintCell::new(6);
+        assert_eq!(0, b.value());
+        assert_eq!(6, b.boundary);
+    }
+
+    #[test]
+    fn cell_format() {
+        let b: BintCell = BintCell {
+            cell: Cell::new(4),
+            boundary: 6,
+        };
+        assert_eq!("4", format!("{}", b));
+    }
+
+    #[test]
+    fn cell_up() {
+        let b: BintCell = BintCell {
+            cell: Cell::new(4),
+            boundary: 6,
+        };
+        b.up();
+        assert_eq!(5, b.value());
+
+        b.up();
+        assert_eq!(0, b.value());
+    }
+
+    #[test]
+    fn cell_down() {
+        let b: BintCell = BintCell {
+            cell: Cell::new(1),
+            boundary: 6,
+        };
+        b.down();
+        assert_eq!(0, b.value());
+
+        b.down();
+        assert_eq!(5, b.value());
+    }
+
+    #[test]
+    fn cell_reset() {
+        
     }
 }
