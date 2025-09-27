@@ -9,6 +9,6 @@ fn main() {
     for _ in 0..60 {
         let (x, y) = perms(bint.value);
         bint = bint.up();
-        println!("{x} {y}");
+        println!("{} {}", x, y);
     }
 }
