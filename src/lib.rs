@@ -21,7 +21,7 @@ use std::fmt;
 /// assert_eq!(0, c.value);
 /// assert_eq!(1, d.value);
 /// ```
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Bint {
     pub value: u8,
     pub boundary: u8,
