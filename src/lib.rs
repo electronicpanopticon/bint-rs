@@ -1,4 +1,6 @@
 #![warn(clippy::pedantic)]
+#![allow(clippy::needless_doctest_main)]
+#![cfg_attr(doc, doc = include_str!("../README.md"))]
 
 use std::cell::Cell;
 use std::fmt;
@@ -13,7 +15,7 @@ use std::fmt;
 /// ```
 /// use bint::Bint;
 ///
-/// let b: Bint = Bint {value: 5, boundary: 6 };
+/// let b = Bint {value: 5, boundary: 6 };
 /// let c: Bint = b.up();
 /// let d: Bint = c.up();
 ///
@@ -21,7 +23,7 @@ use std::fmt;
 /// assert_eq!(0, c.value);
 /// assert_eq!(1, d.value);
 /// ```
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Bint {
     pub value: u8,
     pub boundary: u8,
@@ -93,6 +95,26 @@ impl Bint {
     /// use bint::Bint;
     ///
     /// let b: Bint = Bint {
+    ///     value: 4,
+    ///     boundary: 6,
+    /// };
+    ///
+    /// let b: Bint = b.up_x(3);
+    /// assert_eq!(1, b.value);
+    /// ```
+    #[must_use]
+    pub fn up_x(self, x: u8) -> Bint {
+        let mut up = self;
+        for _ in 0..x {
+            up = up.up();
+        }
+        up
+    }
+
+    /// ```
+    /// use bint::Bint;
+    ///
+    /// let b: Bint = Bint {
     ///     value: 1,
     ///     boundary: 6,
     /// };
@@ -116,6 +138,29 @@ impl Bint {
             value: v,
             boundary: self.boundary,
         }
+    }
+
+    /// ```
+    /// use bint::Bint;
+    ///
+    /// let b: Bint = Bint {
+    ///     value: 4,
+    ///     boundary: 6,
+    /// };
+    ///
+    /// let b: Bint = b.down_x(6);
+    /// assert_eq!(4, b.value);
+    ///
+    /// let b: Bint = b.down_x(3);
+    /// assert_eq!(1, b.value);
+    /// ```
+    #[must_use]
+    pub fn down_x(self, x: u8) -> Bint {
+        let mut down = self;
+        for _ in 0..x {
+            down = down.down();
+        }
+        down
     }
 }
 

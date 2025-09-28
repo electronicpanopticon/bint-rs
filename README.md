@@ -1,5 +1,5 @@
 ![Build Status](https://github.com/electronicpanopticon/bint-rs/actions/workflows/CI.yaml/badge.svg)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](https://github.com/electronicpanopticon/bint-rs/blob/main/LICENSE)
 [![Crates.io Version](https://img.shields.io/crates/v/bint.svg)](https://crates.io/crates/bint)
 
 # bint-rs
@@ -11,7 +11,7 @@ Bounded Integer in Rust
 Original immutable Bint:
 
 ```
-extern crate bint;
+use bint::Bint;
 
 let b: bint::Bint = bint::Bint {value: 5, boundary: 6 };
 let c: Bint = b.up();
