@@ -259,6 +259,20 @@ impl BintCell {
     ///
     /// let b = BintCell::new(6);
     ///
+    /// b.up_x(3);
+    /// assert_eq!(3, b.value());
+    /// ```
+    pub fn up_x(&self, x: u8) {
+        for _ in 0..x {
+            self.up();
+        }
+    }
+
+    /// ```
+    /// use bint::BintCell;
+    ///
+    /// let b = BintCell::new(6);
+    ///
     /// b.down();
     /// assert_eq!(5, b.value());
     ///
@@ -272,6 +286,20 @@ impl BintCell {
         }
         .down();
         self.cell.set(bint.value);
+    }
+
+    /// ```
+    /// use bint::BintCell;
+    ///
+    /// let b = BintCell::new(6);
+    ///
+    /// b.down_x(2);
+    /// assert_eq!(4, b.value());
+    /// ```
+    pub fn down_x(&self, x: u8) {
+        for _ in 0..x {
+            self.down();
+        }
     }
 
     pub fn reset(&self) {
