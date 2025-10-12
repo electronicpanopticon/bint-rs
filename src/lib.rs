@@ -302,8 +302,28 @@ impl BintCell {
         }
     }
 
+    /// ```
+    /// use bint::BintCell;
+    ///
+    /// let b = BintCell::new_with_value(8, 5);
+    /// b.reset();
+    ///
+    /// assert_eq!(0, b.value());
+    /// ```
     pub fn reset(&self) {
-        self.cell.set(0);
+        self.set(0);
+    }
+
+    /// ```
+    /// use bint::BintCell;
+    ///
+    /// let b = BintCell::new(8);
+    /// b.set(5);
+    ///
+    /// assert_eq!(5, b.value());
+    /// ```
+    pub fn set(&self, value: u8) {
+        self.cell.set(value);
     }
 
     #[must_use]
