@@ -400,6 +400,46 @@ impl BintCell {
         self.cell.set(value);
     }
 
+    /// Returns a Bint version x number of spots up. This is a utility method to simplify
+    /// something that I needed on my poker library.
+    ///
+    /// ```
+    /// use bint::{Bint, BintCell};
+    ///
+    /// let cell = BintCell::new_with_value(6, 3);
+    /// let expected = Bint {
+    ///     value: 0,
+    ///     boundary: 6
+    /// };
+    ///
+    /// assert_eq!(expected, cell.static_down_x(3));
+    /// assert_eq!(expected, cell.static_down_x(9));
+    /// ```
+    pub fn static_down_x(&self, x: u8) -> Bint {
+        Bint::from(self).down_x(x)
+    }
+
+    /// Returns a Bint version x number of spots up. This is a utility method to simplify
+    /// something that I needed on my poker library.
+    ///
+    /// ```
+    /// use bint::{Bint, BintCell};
+    ///
+    /// let cell = BintCell::new(6);
+    /// let expected = Bint {
+    ///     value: 3,
+    ///     boundary: 6
+    /// };
+    ///
+    /// let actual = cell.static_up_x(3);
+    ///
+    /// assert_eq!(expected, cell.static_up_x(3));
+    /// assert_eq!(expected, cell.static_up_x(9));
+    /// ```
+    pub fn static_up_x(&self, x: u8) -> Bint {
+        Bint::from(self).up_x(x)
+    }
+
     #[must_use]
     pub fn value(&self) -> u8 {
         self.cell.get()
