@@ -223,6 +223,27 @@ impl From<BintCell> for Bint {
         }
     }
 }
+
+impl From<&BintCell> for Bint {
+    /// ```
+    /// use bint::{Bint, BintCell};
+    ///
+    /// let cell = BintCell::new_with_value(8, 3);
+    /// let expected = Bint {
+    ///     value: cell.value(),
+    ///     boundary: cell.boundary,
+    /// };
+    ///
+    /// assert_eq!(expected, Bint::from(cell));
+    /// ```
+    fn from(cell: &BintCell) -> Self {
+        Bint {
+            value: cell.value(),
+            boundary: cell.boundary,
+        }
+    }
+}
+
 /// `BintCell`: A bounded integer captured in a [`Cell`](https://doc.rust-lang.org/std/cell/struct.Cell.html).
 ///
 /// Allows for Bint functionality in a single entity.
@@ -431,6 +452,19 @@ impl From<Bint> for BintCell {
     }
 }
 
+impl From<&Bint> for BintCell {
+    /// ```
+    /// use bint::{Bint, BintCell};
+    ///
+    /// let bint = Bint::new_with_value(8, 3);
+    /// let expected = BintCell::new_with_value(8, 3);
+    ///
+    /// assert_eq!(expected, BintCell::from(&bint));
+    /// ```
+    fn from(cell: &Bint) -> Self {
+        BintCell::new_with_value(cell.boundary, cell.value)
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
