@@ -84,7 +84,10 @@ impl Bint {
     /// ```
     #[must_use]
     pub fn up(&self) -> Bint {
-        let v = (self.value + 1) % self.boundary;
+        let v = match self.boundary {
+            0 => 0,
+            _ => (self.value + 1) % self.boundary,
+        };
         Bint {
             value: v,
             boundary: self.boundary,
@@ -127,6 +130,11 @@ impl Bint {
     /// ```
     #[must_use]
     pub fn down(&self) -> Bint {
+        // This deals with the issue where someone creates a default Bint with a zero boundqry
+        // triggering a divide by zero error.
+        if self.boundary == 0 {
+            return *self;
+        }
         if self.value == 0 {
             return Bint {
                 value: self.boundary - 1,
@@ -161,6 +169,32 @@ impl Bint {
             down = down.down();
         }
         down
+    }
+}
+
+impl Default for Bint {
+    /// Defaults to the maximum value of an unsigned 8 integer.
+    ///
+    /// ```
+    /// use bint::Bint;
+    ///
+    /// let mut b = Bint::default();
+    ///
+    /// for _ in 0..u8::MAX {
+    ///     b = b.down()
+    /// }
+    ///
+    /// for _ in 0..u8::MAX {
+    ///     b = b.down()
+    /// }
+    ///
+    /// assert_eq!(b.value, 0)
+    /// ```
+    fn default() -> Self {
+        Bint {
+            value: 0,
+            boundary: u8::MAX,
+        }
     }
 }
 
@@ -332,6 +366,32 @@ impl BintCell {
     }
 }
 
+impl Default for BintCell {
+    /// Defaults to the maximum value of an unsigned 8 integer.
+    ///
+    /// ```
+    /// use bint::BintCell;
+    ///
+    /// let b = BintCell::default();
+    ///
+    /// for _ in 0..u8::MAX {
+    ///     b.up()
+    /// }
+    ///
+    /// for _ in 0..u8::MAX {
+    ///     b.down()
+    /// }
+    ///
+    /// assert_eq!(b.value(), 0)
+    /// ```
+    fn default() -> Self {
+        BintCell {
+            cell: Cell::new(0),
+            boundary: u8::MAX,
+        }
+    }
+}
+
 impl fmt::Display for BintCell {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.value())
@@ -360,6 +420,46 @@ mod tests {
             boundary: 6,
         };
         assert_eq!("4", format!("{}", b));
+    }
+
+    #[test]
+    fn up() {
+        let mut b = Bint::new(8);
+
+        for _ in 0..16 {
+            b = b.up();
+        }
+
+        assert_eq!(0, b.value);
+    }
+
+    #[test]
+    fn up_default_defect() {
+        let b = Bint::new(0);
+
+        let c = b.up();
+
+        assert_eq!(0, c.value);
+    }
+
+    #[test]
+    fn down() {
+        let mut b = Bint::new(8);
+
+        for _ in 0..16 {
+            b = b.down();
+        }
+
+        assert_eq!(0, b.value);
+    }
+
+    #[test]
+    fn down_default_defect() {
+        let b = Bint::new(0);
+
+        let c = b.down();
+
+        assert_eq!(0, c.value);
     }
 
     #[test]
@@ -399,6 +499,17 @@ mod tests {
     }
 
     #[test]
+    fn cell_up_loop() {
+        let b = BintCell::new(8);
+
+        for _ in 0..16 {
+            b.up();
+        }
+
+        assert_eq!(0, b.value());
+    }
+
+    #[test]
     fn cell_down() {
         let b: BintCell = BintCell {
             cell: Cell::new(1),
@@ -409,6 +520,17 @@ mod tests {
 
         b.down();
         assert_eq!(5, b.value());
+    }
+
+    #[test]
+    fn cell_down_loop() {
+        let b = BintCell::new(8);
+
+        for _ in 0..16 {
+            b.down();
+        }
+
+        assert_eq!(0, b.value());
     }
 
     #[test]

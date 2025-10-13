@@ -1,7 +1,7 @@
 [package]
 name = "bint"
 description = "Bounded Integer in Rust."
-version = "0.1.8"
+version = "0.1.9"
 rust-version = "1.56.0"
 edition = "2018"
 authors = ["electronicpanopticon <gaoler@electronicpanopticon.com>"]
