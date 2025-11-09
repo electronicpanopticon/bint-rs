@@ -28,13 +28,26 @@ New and improved BintCell:
 use bint::BintCell;
 
 let b = BintCell::new(6);
-b.down();
-assert_eq!(5, b.value());
+assert_eq!(5, b.down());
 
 b.up();
 b.up();
 b.up_x(2);
 assert_eq!(3, b.value());
+```
+
+New DrainableBintCell that expires after a certain number of usages:
+
+```
+use bint::DrainableBintCell;
+
+let b = DrainableBintCell::new(4, 4);
+
+assert_eq!(1, b.up().unwrap());
+assert_eq!(2, b.up().unwrap());
+assert_eq!(3, b.up().unwrap());
+assert_eq!(0, b.up().unwrap());
+assert!(b.up().is_none());
 ```
 
 ## Other examples

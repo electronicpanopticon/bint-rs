@@ -244,6 +244,34 @@ impl From<&BintCell> for Bint {
     }
 }
 
+impl From<DrainableBintCell> for Bint {
+    /// ```
+    /// use bint::{Bint, DrainableBintCell};
+    ///
+    /// let bint_cell = DrainableBintCell::new_with_value(8, 8, 3);
+    /// let expected = Bint::new_with_value(8, 3);
+    ///
+    /// assert_eq!(expected, Bint::from(bint_cell));
+    /// ```
+    fn from(cell: DrainableBintCell) -> Self {
+        Bint::from(cell.bint_cell)
+    }
+}
+
+impl From<&DrainableBintCell> for Bint {
+    /// ```
+    /// use bint::{Bint, DrainableBintCell};
+    ///
+    /// let bint_cell = DrainableBintCell::new_with_value(8, 8, 3);
+    /// let expected = Bint::new_with_value(8, 3);
+    ///
+    /// assert_eq!(expected, Bint::from(&bint_cell));
+    /// ```
+    fn from(cell: &DrainableBintCell) -> Self {
+        Bint::from(cell.bint_cell.clone())
+    }
+}
+
 /// `BintCell`: A bounded integer captured in a [`Cell`](https://doc.rust-lang.org/std/cell/struct.Cell.html).
 ///
 /// Allows for Bint functionality in a single entity.
@@ -314,18 +342,19 @@ impl BintCell {
     /// let b = BintCell::new(6);
     ///
     /// b.up();
-    /// assert_eq!(1, b.value());
+    /// assert_eq!(2, b.up());
     ///
     /// b.up();
-    /// assert_eq!(2, b.value());
+    /// assert_eq!(4, b.up());
     /// ```
-    pub fn up(&self) {
+    pub fn up(&self) -> u8 {
         let bint = Bint {
             value: self.value(),
             boundary: self.boundary,
         }
         .up();
         self.cell.set(bint.value);
+        bint.value
     }
 
     /// ```
@@ -336,10 +365,11 @@ impl BintCell {
     /// b.up_x(3);
     /// assert_eq!(3, b.value());
     /// ```
-    pub fn up_x(&self, x: u8) {
+    pub fn up_x(&self, x: u8) -> u8 {
         for _ in 0..x {
             self.up();
         }
+        self.value()
     }
 
     /// ```
@@ -348,18 +378,19 @@ impl BintCell {
     /// let b = BintCell::new(6);
     ///
     /// b.down();
-    /// assert_eq!(5, b.value());
+    /// assert_eq!(4, b.down());
     ///
     /// b.down();
-    /// assert_eq!(4, b.value());
+    /// assert_eq!(2, b.down());
     /// ```
-    pub fn down(&self) {
+    pub fn down(&self) -> u8 {
         let bint = Bint {
             value: self.value(),
             boundary: self.boundary,
         }
         .down();
         self.cell.set(bint.value);
+        bint.value
     }
 
     /// ```
@@ -367,13 +398,13 @@ impl BintCell {
     ///
     /// let b = BintCell::new(6);
     ///
-    /// b.down_x(2);
-    /// assert_eq!(4, b.value());
+    /// assert_eq!(4, b.down_x(2));
     /// ```
-    pub fn down_x(&self, x: u8) {
+    pub fn down_x(&self, x: u8) -> u8 {
         for _ in 0..x {
             self.down();
         }
+        self.value()
     }
 
     /// ```
@@ -455,11 +486,11 @@ impl Default for BintCell {
     /// let b = BintCell::default();
     ///
     /// for _ in 0..u8::MAX {
-    ///     b.up()
+    ///     b.up();
     /// }
     ///
     /// for _ in 0..u8::MAX {
-    ///     b.down()
+    ///     b.down();
     /// }
     ///
     /// assert_eq!(b.value(), 0)
@@ -505,6 +536,156 @@ impl From<&Bint> for BintCell {
         BintCell::new_with_value(cell.boundary, cell.value)
     }
 }
+
+impl From<DrainableBintCell> for BintCell {
+    /// ```
+    /// use bint::{BintCell, DrainableBintCell};
+    ///
+    /// let bint_cell = DrainableBintCell::new_with_value(8, 8, 3);
+    /// let expected = BintCell::new_with_value(8, 3);
+    ///
+    /// assert_eq!(expected, BintCell::from(bint_cell));
+    /// ```
+    fn from(cell: DrainableBintCell) -> Self {
+        cell.bint_cell
+    }
+}
+
+impl From<&DrainableBintCell> for BintCell {
+    /// ```
+    /// use bint::{BintCell, DrainableBintCell};
+    ///
+    /// let bint_cell = DrainableBintCell::new_with_value(8, 8, 3);
+    /// let expected = BintCell::new_with_value(8, 3);
+    ///
+    /// assert_eq!(expected, BintCell::from(&bint_cell));
+    /// ```
+    fn from(cell: &DrainableBintCell) -> Self {
+        cell.bint_cell.clone()
+    }
+}
+
+/// Version of a `BintCell` that can only be called a limited number of times, after which it
+/// returns none.
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub struct DrainableBintCell {
+    bint_cell: BintCell,
+    pub capacity: Cell<usize>,
+}
+
+impl DrainableBintCell {
+    #[must_use]
+    pub fn new(boundary: u8, capacity: usize) -> DrainableBintCell {
+        DrainableBintCell {
+            bint_cell: BintCell::new(boundary),
+            capacity: Cell::new(capacity),
+        }
+    }
+
+    /// ```
+    /// use bint::DrainableBintCell;
+    ///
+    /// let b = DrainableBintCell::new_with_value(4, 4, 3);
+    ///
+    /// assert_eq!(3, b.value());
+    /// assert_eq!(2, b.down().unwrap());
+    /// assert_eq!(1, b.down().unwrap());
+    /// assert_eq!(0, b.down().unwrap());
+    /// assert_eq!(3, b.down().unwrap());
+    /// assert!(b.down().is_none());
+    /// ```
+    #[must_use]
+    pub fn new_with_value(boundary: u8, capacity: usize, value: u8) -> DrainableBintCell {
+        DrainableBintCell {
+            bint_cell: BintCell::new_with_value(boundary, value),
+            capacity: Cell::new(capacity),
+        }
+    }
+
+    /// ```
+    /// use bint::DrainableBintCell;
+    ///
+    /// let b = DrainableBintCell::new(4, 8);
+    ///
+    /// assert_eq!(3, b.down().unwrap());
+    /// assert_eq!(2, b.down().unwrap());
+    /// assert_eq!(1, b.down().unwrap());
+    /// assert_eq!(0, b.down().unwrap());
+    /// assert_eq!(3, b.down().unwrap());
+    /// assert_eq!(2, b.down().unwrap());
+    /// assert_eq!(1, b.down().unwrap());
+    /// assert_eq!(0, b.down().unwrap());
+    /// assert!(b.down().is_none());
+    /// ```
+    #[must_use]
+    pub fn down(&self) -> Option<u8> {
+        self.drain()?;
+        Some(self.bint_cell.down())
+    }
+
+    /// ```
+    /// use bint::DrainableBintCell;
+    ///
+    /// let b = DrainableBintCell::new(4, 4);
+    ///
+    /// assert_eq!(2, b.down_x(2).unwrap());
+    /// assert_eq!(0, b.down_x(2).unwrap());
+    /// assert!(b.down_x(2).is_none());
+    /// ```
+    #[must_use]
+    pub fn down_x(&self, x: u8) -> Option<u8> {
+        for _ in 0..x {
+            self.down()?;
+        }
+        Some(self.value())
+    }
+
+    /// Removes one from the capacity.
+    pub fn drain(&self) -> Option<usize> {
+        self.capacity.set(self.capacity.get().checked_sub(1)?);
+        Some(self.capacity.get())
+    }
+
+    /// ```
+    /// use bint::DrainableBintCell;
+    ///
+    /// let b = DrainableBintCell::new(4, 4);
+    ///
+    /// assert_eq!(1, b.up().unwrap());
+    /// assert_eq!(2, b.up().unwrap());
+    /// assert_eq!(3, b.up().unwrap());
+    /// assert_eq!(0, b.up().unwrap());
+    /// assert!(b.down().is_none());
+    /// ```
+    #[must_use]
+    pub fn up(&self) -> Option<u8> {
+        self.drain()?;
+        Some(self.bint_cell.up())
+    }
+
+    /// ```
+    /// use bint::DrainableBintCell;
+    ///
+    /// let b = DrainableBintCell::new(4, 4);
+    ///
+    /// assert_eq!(3, b.up_x(3).unwrap());
+    /// assert_eq!(0, b.up_x(1).unwrap());
+    /// assert!(b.up_x(2).is_none());
+    /// ```
+    #[must_use]
+    pub fn up_x(&self, x: u8) -> Option<u8> {
+        for _ in 0..x {
+            self.up()?;
+        }
+        Some(self.value())
+    }
+
+    #[must_use]
+    pub fn value(&self) -> u8 {
+        self.bint_cell.value()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -650,5 +831,50 @@ mod tests {
         b.reset();
 
         assert_eq!(0, b.value());
+    }
+
+    #[test]
+    fn drain_down() {
+        let b = DrainableBintCell::new(8, 8);
+
+        assert_eq!(7, b.down().unwrap());
+        assert_eq!(6, b.down().unwrap());
+        assert_eq!(5, b.down().unwrap());
+        assert_eq!(4, b.down().unwrap());
+        assert_eq!(3, b.down().unwrap());
+        assert_eq!(2, b.down().unwrap());
+        assert_eq!(1, b.down().unwrap());
+        assert_eq!(0, b.down().unwrap());
+        assert!(b.up().is_none());
+    }
+
+    #[test]
+    fn drain_drain() {
+        let b = DrainableBintCell::new(8, 8);
+
+        assert_eq!(7, b.drain().unwrap());
+        assert_eq!(6, b.drain().unwrap());
+        assert_eq!(5, b.drain().unwrap());
+        assert_eq!(4, b.drain().unwrap());
+        assert_eq!(3, b.drain().unwrap());
+        assert_eq!(2, b.drain().unwrap());
+        assert_eq!(1, b.drain().unwrap());
+        assert_eq!(0, b.drain().unwrap());
+        assert!(b.drain().is_none());
+    }
+
+    #[test]
+    fn drain_up() {
+        let b = DrainableBintCell::new(8, 8);
+
+        assert_eq!(1, b.up().unwrap());
+        assert_eq!(2, b.up().unwrap());
+        assert_eq!(3, b.up().unwrap());
+        assert_eq!(4, b.up().unwrap());
+        assert_eq!(5, b.up().unwrap());
+        assert_eq!(6, b.up().unwrap());
+        assert_eq!(7, b.up().unwrap());
+        assert_eq!(0, b.up().unwrap());
+        assert!(b.up().is_none());
     }
 }
