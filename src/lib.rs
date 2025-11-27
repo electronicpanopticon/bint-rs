@@ -1,4 +1,4 @@
-#![warn(clippy::pedantic)]
+#![warn(clippy::pedantic, clippy::unwrap_used, clippy::expect_used)]
 #![allow(clippy::needless_doctest_main)]
 #![cfg_attr(doc, doc = include_str!("../README.md"))]
 
