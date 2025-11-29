@@ -649,6 +649,20 @@ impl DrainableBintCell {
     /// ```
     /// use bint::DrainableBintCell;
     ///
+    /// let b = DrainableBintCell::new(1, 1);
+    ///
+    /// assert!(b.has_capacity());
+    /// assert_eq!(0, b.up().unwrap());
+    /// assert!(!b.has_capacity());
+    /// ```
+    #[must_use]
+    pub fn has_capacity(&self) -> bool {
+        self.capacity.get() > 0
+    }
+
+    /// ```
+    /// use bint::DrainableBintCell;
+    ///
     /// let b = DrainableBintCell::new(4, 4);
     ///
     /// assert_eq!(1, b.up().unwrap());
