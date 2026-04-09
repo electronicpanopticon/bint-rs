@@ -187,7 +187,8 @@ impl Bint {
 }
 
 impl Default for Bint {
-    /// Defaults to the maximum value of an unsigned 8 integer.
+    /// Defaults to a boundary of [`u8::MAX`] (255), giving a value range of `0..=254`.
+    /// The full `u8` range `0..=255` is not representable because `boundary` is itself a `u8`.
     ///
     /// ```
     /// use bint::Bint;
@@ -282,7 +283,7 @@ impl From<&DrainableBintCell> for Bint {
     /// assert_eq!(expected, Bint::from(&bint_cell));
     /// ```
     fn from(cell: &DrainableBintCell) -> Self {
-        Bint::from(cell.bint_cell.clone())
+        Bint::from(&cell.bint_cell)
     }
 }
 
@@ -503,7 +504,8 @@ impl BintCell {
 }
 
 impl Default for BintCell {
-    /// Defaults to the maximum value of an unsigned 8 integer.
+    /// Defaults to a boundary of [`u8::MAX`] (255), giving a value range of `0..=254`.
+    /// The full `u8` range `0..=255` is not representable because `boundary` is itself a `u8`.
     ///
     /// ```
     /// use bint::BintCell;
@@ -592,6 +594,18 @@ impl From<&DrainableBintCell> for BintCell {
 
 /// Version of a `BintCell` that can only be called a limited number of times, after which it
 /// returns none.
+///
+/// ```
+/// use bint::DrainableBintCell;
+///
+/// let b = DrainableBintCell::new(4, 4);
+///
+/// assert_eq!(1, b.up().unwrap());
+/// assert_eq!(2, b.up().unwrap());
+/// assert_eq!(3, b.up().unwrap());
+/// assert_eq!(0, b.up().unwrap());
+/// assert!(b.up().is_none()); // capacity exhausted
+/// ```
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct DrainableBintCell {
     bint_cell: BintCell,

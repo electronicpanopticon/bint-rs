@@ -17,10 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [beta, stable, 1.56.0]
-        include:
-          - rust: nightly
-            rustflags: --cfg thiserror_nightly_testing
+        rust: [beta, stable, nightly, 1.56.0]
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -29,8 +26,6 @@ jobs:
           toolchain: ${{matrix.rust}}
           components: rust-src
       - run: cargo test --all
-        env:
-          RUSTFLAGS: ${{matrix.rustflags}} ${{env.RUSTFLAGS}}
 
   clippy:
     name: Clippy
