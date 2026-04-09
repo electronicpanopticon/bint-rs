@@ -570,7 +570,7 @@ impl From<&DrainableBintCell> for BintCell {
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct DrainableBintCell {
     bint_cell: BintCell,
-    pub capacity: Cell<usize>,
+    capacity: Cell<usize>,
 }
 
 impl DrainableBintCell {
