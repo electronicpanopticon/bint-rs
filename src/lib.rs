@@ -293,7 +293,7 @@ impl From<&DrainableBintCell> for Bint {
 /// ```
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct BintCell {
-    pub cell: Cell<u8>,
+    cell: Cell<u8>,
     pub boundary: u8,
 }
 
@@ -780,19 +780,13 @@ mod tests {
 
     #[test]
     fn cell_format() {
-        let b: BintCell = BintCell {
-            cell: Cell::new(4),
-            boundary: 6,
-        };
+        let b = BintCell::new_with_value(6, 4);
         assert_eq!("4", format!("{}", b));
     }
 
     #[test]
     fn cell_up() {
-        let b: BintCell = BintCell {
-            cell: Cell::new(4),
-            boundary: 6,
-        };
+        let b = BintCell::new_with_value(6, 4);
         b.up();
         assert_eq!(5, b.value());
 
@@ -813,10 +807,7 @@ mod tests {
 
     #[test]
     fn cell_down() {
-        let b: BintCell = BintCell {
-            cell: Cell::new(1),
-            boundary: 6,
-        };
+        let b = BintCell::new_with_value(6, 1);
         b.down();
         assert_eq!(0, b.value());
 
