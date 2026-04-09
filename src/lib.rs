@@ -419,16 +419,21 @@ impl BintCell {
         self.set(0);
     }
 
+    /// Values >= boundary are reset to 0, consistent with [`BintCell::new_with_value`].
+    ///
     /// ```
     /// use bint::BintCell;
     ///
     /// let b = BintCell::new(8);
     /// b.set(5);
-    ///
     /// assert_eq!(5, b.value());
+    ///
+    /// b.set(8); // out of range — resets to 0
+    /// assert_eq!(0, b.value());
     /// ```
     pub fn set(&self, value: u8) {
-        self.cell.set(value);
+        self.cell
+            .set(if value >= self.boundary { 0 } else { value });
     }
 
     /// Returns a Bint version x number of spots up. This is a utility method to simplify
