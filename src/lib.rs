@@ -107,11 +107,19 @@ impl Bint {
     /// ```
     #[must_use]
     pub fn up_x(self, x: u8) -> Bint {
-        let mut up = self;
-        for _ in 0..x {
-            up = up.up();
+        if self.boundary == 0 {
+            return Bint {
+                value: 0,
+                boundary: 0,
+            };
         }
-        up
+        // result is always < self.boundary (a u8), so truncation is safe
+        #[allow(clippy::cast_possible_truncation)]
+        let value = ((u16::from(self.value) + u16::from(x)) % u16::from(self.boundary)) as u8;
+        Bint {
+            value,
+            boundary: self.boundary,
+        }
     }
 
     /// ```
@@ -164,16 +172,23 @@ impl Bint {
     /// ```
     #[must_use]
     pub fn down_x(self, x: u8) -> Bint {
-        let mut down = self;
-        for _ in 0..x {
-            down = down.down();
+        if self.boundary == 0 {
+            return self;
         }
-        down
+        // result is always in 0..boundary (a u8), so truncation is safe
+        #[allow(clippy::cast_possible_truncation)]
+        let value =
+            (i16::from(self.value) - i16::from(x)).rem_euclid(i16::from(self.boundary)) as u8;
+        Bint {
+            value,
+            boundary: self.boundary,
+        }
     }
 }
 
 impl Default for Bint {
-    /// Defaults to the maximum value of an unsigned 8 integer.
+    /// Defaults to a boundary of [`u8::MAX`] (255), giving a value range of `0..=254`.
+    /// The full `u8` range `0..=255` is not representable because `boundary` is itself a `u8`.
     ///
     /// ```
     /// use bint::Bint;
@@ -268,7 +283,7 @@ impl From<&DrainableBintCell> for Bint {
     /// assert_eq!(expected, Bint::from(&bint_cell));
     /// ```
     fn from(cell: &DrainableBintCell) -> Self {
-        Bint::from(cell.bint_cell.clone())
+        Bint::from(&cell.bint_cell)
     }
 }
 
@@ -293,7 +308,7 @@ impl From<&DrainableBintCell> for Bint {
 /// ```
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct BintCell {
-    pub cell: Cell<u8>,
+    cell: Cell<u8>,
     pub boundary: u8,
 }
 
@@ -366,10 +381,13 @@ impl BintCell {
     /// assert_eq!(3, b.value());
     /// ```
     pub fn up_x(&self, x: u8) -> u8 {
-        for _ in 0..x {
-            self.up();
+        let bint = Bint {
+            value: self.value(),
+            boundary: self.boundary,
         }
-        self.value()
+        .up_x(x);
+        self.cell.set(bint.value);
+        bint.value
     }
 
     /// ```
@@ -401,10 +419,13 @@ impl BintCell {
     /// assert_eq!(4, b.down_x(2));
     /// ```
     pub fn down_x(&self, x: u8) -> u8 {
-        for _ in 0..x {
-            self.down();
+        let bint = Bint {
+            value: self.value(),
+            boundary: self.boundary,
         }
-        self.value()
+        .down_x(x);
+        self.cell.set(bint.value);
+        bint.value
     }
 
     /// ```
@@ -419,16 +440,21 @@ impl BintCell {
         self.set(0);
     }
 
+    /// Values >= boundary are reset to 0, consistent with [`BintCell::new_with_value`].
+    ///
     /// ```
     /// use bint::BintCell;
     ///
     /// let b = BintCell::new(8);
     /// b.set(5);
-    ///
     /// assert_eq!(5, b.value());
+    ///
+    /// b.set(8); // out of range — resets to 0
+    /// assert_eq!(0, b.value());
     /// ```
     pub fn set(&self, value: u8) {
-        self.cell.set(value);
+        self.cell
+            .set(if value >= self.boundary { 0 } else { value });
     }
 
     /// Returns a Bint version x number of spots up. This is a utility method to simplify
@@ -478,7 +504,8 @@ impl BintCell {
 }
 
 impl Default for BintCell {
-    /// Defaults to the maximum value of an unsigned 8 integer.
+    /// Defaults to a boundary of [`u8::MAX`] (255), giving a value range of `0..=254`.
+    /// The full `u8` range `0..=255` is not representable because `boundary` is itself a `u8`.
     ///
     /// ```
     /// use bint::BintCell;
@@ -567,10 +594,22 @@ impl From<&DrainableBintCell> for BintCell {
 
 /// Version of a `BintCell` that can only be called a limited number of times, after which it
 /// returns none.
+///
+/// ```
+/// use bint::DrainableBintCell;
+///
+/// let b = DrainableBintCell::new(4, 4);
+///
+/// assert_eq!(1, b.up().unwrap());
+/// assert_eq!(2, b.up().unwrap());
+/// assert_eq!(3, b.up().unwrap());
+/// assert_eq!(0, b.up().unwrap());
+/// assert!(b.up().is_none()); // capacity exhausted
+/// ```
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct DrainableBintCell {
     bint_cell: BintCell,
-    pub capacity: Cell<usize>,
+    capacity: Cell<usize>,
 }
 
 impl DrainableBintCell {
@@ -780,19 +819,13 @@ mod tests {
 
     #[test]
     fn cell_format() {
-        let b: BintCell = BintCell {
-            cell: Cell::new(4),
-            boundary: 6,
-        };
+        let b = BintCell::new_with_value(6, 4);
         assert_eq!("4", format!("{}", b));
     }
 
     #[test]
     fn cell_up() {
-        let b: BintCell = BintCell {
-            cell: Cell::new(4),
-            boundary: 6,
-        };
+        let b = BintCell::new_with_value(6, 4);
         b.up();
         assert_eq!(5, b.value());
 
@@ -813,10 +846,7 @@ mod tests {
 
     #[test]
     fn cell_down() {
-        let b: BintCell = BintCell {
-            cell: Cell::new(1),
-            boundary: 6,
-        };
+        let b = BintCell::new_with_value(6, 1);
         b.down();
         assert_eq!(0, b.value());
 
