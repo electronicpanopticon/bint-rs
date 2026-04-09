@@ -107,11 +107,19 @@ impl Bint {
     /// ```
     #[must_use]
     pub fn up_x(self, x: u8) -> Bint {
-        let mut up = self;
-        for _ in 0..x {
-            up = up.up();
+        if self.boundary == 0 {
+            return Bint {
+                value: 0,
+                boundary: 0,
+            };
         }
-        up
+        // result is always < self.boundary (a u8), so truncation is safe
+        #[allow(clippy::cast_possible_truncation)]
+        let value = ((u16::from(self.value) + u16::from(x)) % u16::from(self.boundary)) as u8;
+        Bint {
+            value,
+            boundary: self.boundary,
+        }
     }
 
     /// ```
@@ -164,11 +172,17 @@ impl Bint {
     /// ```
     #[must_use]
     pub fn down_x(self, x: u8) -> Bint {
-        let mut down = self;
-        for _ in 0..x {
-            down = down.down();
+        if self.boundary == 0 {
+            return self;
         }
-        down
+        // result is always in 0..boundary (a u8), so truncation is safe
+        #[allow(clippy::cast_possible_truncation)]
+        let value =
+            (i16::from(self.value) - i16::from(x)).rem_euclid(i16::from(self.boundary)) as u8;
+        Bint {
+            value,
+            boundary: self.boundary,
+        }
     }
 }
 
@@ -366,10 +380,13 @@ impl BintCell {
     /// assert_eq!(3, b.value());
     /// ```
     pub fn up_x(&self, x: u8) -> u8 {
-        for _ in 0..x {
-            self.up();
+        let bint = Bint {
+            value: self.value(),
+            boundary: self.boundary,
         }
-        self.value()
+        .up_x(x);
+        self.cell.set(bint.value);
+        bint.value
     }
 
     /// ```
@@ -401,10 +418,13 @@ impl BintCell {
     /// assert_eq!(4, b.down_x(2));
     /// ```
     pub fn down_x(&self, x: u8) -> u8 {
-        for _ in 0..x {
-            self.down();
+        let bint = Bint {
+            value: self.value(),
+            boundary: self.boundary,
         }
-        self.value()
+        .down_x(x);
+        self.cell.set(bint.value);
+        bint.value
     }
 
     /// ```
