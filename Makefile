@@ -1,4 +1,4 @@
-.PHONY: clean build test test-unit test-doc build_test fmt clippy create_docs ayce default help docs test-nightly clippy-nightly nightly miri tree tree-duplicates deny audit unused-deps install-tools install-nextest watch install-watch
+.PHONY: clean build test test-unit test-doc build_test fmt clippy create_docs ayce default help docs test-nightly clippy-nightly nightly miri mutants tree tree-duplicates deny audit unused-deps install-tools install-nextest install-mutants watch install-watch
 
 # Default target
 default: ayce
@@ -25,6 +25,7 @@ help:
 	@echo "  make clippy-nightly  - Run clippy with nightly and deny warnings"
 	@echo "  make nightly         - Run nightly test and clippy checks"
 	@echo "  make miri            - Run tests under Miri"
+	@echo "  make mutants         - Run mutation tests via cargo-mutants"
 	@echo "  make unused-deps     - Find unused dependencies with cargo-udeps"
 	@echo ""
 	@echo "Dependencies and Security:"
@@ -34,8 +35,9 @@ help:
 	@echo "  make audit           - Run advisory-only security audit"
 	@echo ""
 	@echo "Tools and Workflow:"
-	@echo "  make install-tools   - Install cargo-deny, cargo-udeps, and cargo-nextest"
+	@echo "  make install-tools   - Install cargo-deny, cargo-udeps, cargo-nextest, and cargo-mutants"
 	@echo "  make install-nextest - Install cargo-nextest"
+	@echo "  make install-mutants - Install cargo-mutants"
 	@echo "  make watch           - Run cargo-watch for check/test loop"
 	@echo "  make install-watch   - Install cargo-watch"
 	@echo ""
@@ -74,6 +76,26 @@ test-doc:
 
 # Run all tests: unit tests via nextest, doc tests via cargo test
 test: test-unit test-doc
+
+# Check for cargo-mutants, prompt to install if missing
+define check_mutants
+	@if ! cargo mutants --version >/dev/null 2>&1; then \
+		echo "cargo-mutants is not installed."; \
+		printf "Install it now? [y/N] "; \
+		read answer; \
+		if [ "$$answer" = "y" ] || [ "$$answer" = "Y" ]; then \
+			cargo install cargo-mutants; \
+		else \
+			echo "Aborting: cargo-mutants is required for mutation testing."; \
+			exit 1; \
+		fi; \
+	fi
+endef
+
+# Run mutation tests
+mutants:
+	$(check_mutants)
+	cargo mutants
 
 # Clean once, then run build + test
 build_test: clean build test
@@ -147,12 +169,17 @@ ayce: fmt build_test clippy create_docs
 install-nextest:
 	cargo install cargo-nextest --locked
 
+# Install cargo-mutants
+install-mutants:
+	cargo install cargo-mutants
+
 # Install required tools
 install-tools:
 	@echo "Installing development tools..."
 	cargo install cargo-deny
 	cargo install cargo-udeps
 	cargo install cargo-nextest --locked
+	cargo install cargo-mutants
 	@echo ""
 	@echo "Tools installed!"
 	@echo ""
