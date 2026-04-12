@@ -1,4 +1,4 @@
-.PHONY: clean build test build_test fmt clippy create_docs ayce default help docs test-nightly clippy-nightly nightly miri tree tree-duplicates deny audit unused-deps install-tools watch install-watch
+.PHONY: clean build test test-unit test-doc build_test fmt clippy create_docs ayce default help docs test-nightly clippy-nightly nightly miri tree tree-duplicates deny audit unused-deps install-tools install-nextest watch install-watch
 
 # Default target
 default: ayce
@@ -9,7 +9,9 @@ help:
 	@echo "  make (default)       - Run ayce"
 	@echo "  make build           - Build the project"
 	@echo "  make clean           - Clean build artifacts"
-	@echo "  make test            - Run tests"
+	@echo "  make test            - Run all tests (nextest for unit, cargo test for doc)"
+	@echo "  make test-unit       - Run unit tests via cargo-nextest"
+	@echo "  make test-doc        - Run doc tests via cargo test --doc"
 	@echo "  make build_test      - Clean once, then build and test"
 	@echo "  make fmt             - Format code"
 	@echo "  make clippy          - Run clippy linter"
@@ -32,7 +34,8 @@ help:
 	@echo "  make audit           - Run advisory-only security audit"
 	@echo ""
 	@echo "Tools and Workflow:"
-	@echo "  make install-tools   - Install cargo-deny and cargo-udeps"
+	@echo "  make install-tools   - Install cargo-deny, cargo-udeps, and cargo-nextest"
+	@echo "  make install-nextest - Install cargo-nextest"
 	@echo "  make watch           - Run cargo-watch for check/test loop"
 	@echo "  make install-watch   - Install cargo-watch"
 	@echo ""
@@ -45,9 +48,32 @@ clean:
 build:
 	cargo build
 
-# Run tests
-test:
-	cargo test
+# Check for cargo-nextest, prompt to install if missing
+define check_nextest
+	@if ! cargo nextest --version >/dev/null 2>&1; then \
+		echo "cargo-nextest is not installed."; \
+		printf "Install it now? [y/N] "; \
+		read answer; \
+		if [ "$$answer" = "y" ] || [ "$$answer" = "Y" ]; then \
+			cargo install cargo-nextest --locked; \
+		else \
+			echo "Aborting: cargo-nextest is required for unit tests."; \
+			exit 1; \
+		fi; \
+	fi
+endef
+
+# Run unit tests via nextest
+test-unit:
+	$(check_nextest)
+	cargo nextest run
+
+# Run doc tests
+test-doc:
+	cargo test --doc
+
+# Run all tests: unit tests via nextest, doc tests via cargo test
+test: test-unit test-doc
 
 # Clean once, then run build + test
 build_test: clean build test
@@ -117,11 +143,16 @@ docs: create_docs
 # All You Can Eat - Run all checks
 ayce: fmt build_test clippy create_docs
 
+# Install cargo-nextest
+install-nextest:
+	cargo install cargo-nextest --locked
+
 # Install required tools
 install-tools:
 	@echo "Installing development tools..."
 	cargo install cargo-deny
 	cargo install cargo-udeps
+	cargo install cargo-nextest --locked
 	@echo ""
 	@echo "Tools installed!"
 	@echo ""
