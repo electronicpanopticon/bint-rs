@@ -84,14 +84,7 @@ impl Bint {
     /// ```
     #[must_use]
     pub fn up(&self) -> Bint {
-        let v = match self.boundary {
-            0 => 0,
-            _ => (self.value + 1) % self.boundary,
-        };
-        Bint {
-            value: v,
-            boundary: self.boundary,
-        }
+        self.up_x(1)
     }
 
     /// ```
@@ -781,6 +774,16 @@ mod tests {
         let c = b.up();
 
         assert_eq!(0, c.value);
+    }
+
+    #[test]
+    fn up_at_u8_max_does_not_panic() {
+        let b = Bint {
+            value: u8::MAX,
+            boundary: 6,
+        };
+
+        assert_eq!(4, b.up().value);
     }
 
     #[test]
